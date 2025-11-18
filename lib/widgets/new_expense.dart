@@ -1,7 +1,8 @@
 import 'package:expense_tracker/models/expense.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
+import 'dart:io';
 
 final formatter = DateFormat.yMd();
 
@@ -18,6 +19,41 @@ class _NewExpenseState extends State<NewExpense> {
   final _costController = TextEditingController();
   DateTime? _selectedDate;
   Category _selectedCategory = Category.leisure;
+
+  void _showDialog(){
+    if(Platform.isIOS){
+      showCupertinoDialog(
+        context: context,
+        builder: ((ctx) => CupertinoAlertDialog(
+          title: const Text("Invalid Input"),
+          content: const Text("Please make sure to have valid Title, Date and Amount!"),
+          actions:[
+            TextButton(onPressed: (){
+              Navigator.pop(ctx);
+            },
+            child: const Text("Okay!"),)
+            ],
+          )
+        ),
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: ((ctx) => AlertDialog(
+          title: const Text("Invalid Input"),
+          content: const Text("Please make sure to have valid Title, Date and Amount!"),
+          actions:[
+            TextButton(onPressed: (){
+              Navigator.pop(ctx);
+            },
+            child: const Text("Okay!"),)
+            ],
+          )
+        ),
+      );
+    }
+  }
+
   @override
   void dispose(){
     _titleController.dispose();
@@ -31,20 +67,7 @@ class _NewExpenseState extends State<NewExpense> {
     final amountIsInvalid = enteredAmount == null || enteredAmount <= 0;
     if(_titleController.text.trim().isEmpty || amountIsInvalid || _selectedDate == null){
       //show some error -> tell the user it cant be empty
-      showDialog(
-        context: context,
-        builder: ((ctx) => AlertDialog(
-          title: const Text("Invalid Input"),
-          content: const Text("Please make sure to have valid Title, Date and Amount!"),
-          actions:[
-            TextButton(onPressed: (){
-              Navigator.pop(ctx);
-            },
-            child: const Text("Okay!"),)
-          ],
-          )
-        )
-      );
+      _showDialog();
       return;
     }
     widget.onAddExpense(
@@ -77,6 +100,7 @@ class _NewExpenseState extends State<NewExpense> {
   
   @override
   Widget build(BuildContext context) {
+    // final keyboardSpace = MediaQuery.of(context).viewInsets.bottom;
     return Padding(
       padding: EdgeInsets.fromLTRB(16, 48, 16, 16),
       child: Column(
